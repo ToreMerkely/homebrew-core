@@ -3,8 +3,8 @@ class Fwupd < Formula
 
   desc "Firmware update daemon"
   homepage "https://github.com/fwupd/fwupd"
-  url "https://github.com/fwupd/fwupd/releases/download/1.9.25/fwupd-1.9.25.tar.xz"
-  sha256 "a1d484778ae87c69b38f417659b33fe3d689373ce0831d1f95617b8aa76e8c37"
+  url "https://github.com/fwupd/fwupd/releases/download/2.0.0/fwupd-2.0.0.tar.xz"
+  sha256 "60a62b850e2c3a818f3178cb1de0f632b1e04c6ab07c02483af398940713548a"
   license "LGPL-2.1-or-later"
   head "https://github.com/fwupd/fwupd.git", branch: "main"
 
@@ -22,7 +22,7 @@ class Fwupd < Formula
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkg-config" => [:build, :test]
   depends_on "python@3.12" => :build
   depends_on "vala" => :build
 
@@ -37,6 +37,7 @@ class Fwupd < Formula
   depends_on "libxmlb"
   depends_on "protobuf-c"
   depends_on "sqlite"
+  depends_on "usb.ids"
   depends_on "xz"
 
   uses_from_macos "curl"
@@ -80,6 +81,7 @@ class Fwupd < Formula
                     # these two are needed for https://github.com/fwupd/fwupd/pull/6147
                     "-Dplugin_logitech_scribe=disabled",
                     "-Dplugin_logitech_tap=disabled",
+                    "-Dvendor_ids_dir=#{Formula["usb.ids"].opt_share}/misc/usb.ids",
                     *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
@@ -95,22 +97,9 @@ class Fwupd < Formula
         return 0;
       }
     EOS
-    gettext = Formula["gettext"]
-    glib = Formula["glib"]
-    flags = %W[
-      -I#{glib.opt_include}/glib-2.0
-      -I#{glib.opt_lib}/glib-2.0/include
-      -I#{include}/fwupd-1
-      -L#{gettext.opt_lib}
-      -L#{glib.opt_lib}
-      -L#{lib}
-      -lgio-2.0
-      -lglib-2.0
-      -lgobject-2.0
-      -lfwupd
-    ]
-    flags << "-lintl" if OS.mac?
-    system ENV.cc, "test.c", "-o", "test", *flags
+
+    pkg_config_flags = shell_output("pkg-config --cflags --libs fwupd").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *pkg_config_flags
     system "./test"
 
     # this is a lame test, but fwupdtool requires root access to do anything much interesting
