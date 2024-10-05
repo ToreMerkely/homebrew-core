@@ -1,9 +1,10 @@
 class Felinks < Formula
   desc "Text mode browser and Gemini, NNTP, FTP, Gopher, Finger, and BitTorrent client"
   homepage "https://github.com/rkd77/elinks"
-  url "https://github.com/rkd77/elinks/releases/download/v0.17.0/elinks-0.17.0.tar.xz"
-  sha256 "58c73a6694dbb7ccf4e22cee362cf14f1a20c09aaa4273343e8b7df9378b330e"
+  url "https://github.com/rkd77/elinks/releases/download/v0.17.1.1/elinks-0.17.1.1.tar.xz"
+  sha256 "dc6f292b7173814d480655e7037dd68b7251303545ca554344d7953a57c4ba63"
   license "GPL-2.0-only"
+  head "https://github.com/rkd77/elinks.git", branch: "master"
 
   bottle do
     sha256 cellar: :any,                 arm64_sequoia:  "ebdbb9519964c5d841d3de3adea1dd0bda1ca6bb1ad8d45ad33a68df6674552f"
@@ -16,12 +17,8 @@ class Felinks < Formula
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "ec20a05e457d72c74f13e12ce329f14f349488ee543e5e68fe2a1443acde547f"
   end
 
-  head do
-    url "https://github.com/rkd77/elinks.git", branch: "master"
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-  end
-
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
   depends_on "brotli"
   depends_on "libidn2"
@@ -31,36 +28,36 @@ class Felinks < Formula
 
   uses_from_macos "bison" => :build
   uses_from_macos "bzip2"
+  uses_from_macos "curl"
   uses_from_macos "expat"
   uses_from_macos "zlib"
 
   def install
-    # https://github.com/rkd77/elinks/issues/47#issuecomment-1190547847 parallelization issue.
-    ENV.deparallelize
-    system "./autogen.sh" if build.head?
-    system "./configure", *std_configure_args,
-                          "--disable-nls",
-                          "--enable-256-colors",
-                          "--enable-88-colors",
-                          "--enable-bittorrent",
-                          "--enable-cgi",
-                          "--enable-exmode",
-                          "--enable-finger",
-                          "--enable-gemini",
-                          "--enable-gopher",
-                          "--enable-html-highlight",
-                          "--enable-nntp",
-                          "--enable-true-color",
-                          "--with-brotli",
-                          "--with-openssl",
-                          "--with-tre",
-                          "--without-gnutls",
-                          "--without-perl",
-                          "--without-spidermonkey",
-                          "--without-x",
-                          "--without-xterm"
-    system "make"
-    system "make", "install"
+    args = %w[
+      -D256-colors=true
+      -D88-colors=true
+      -Dbittorrent=true
+      -Dbrotli=true
+      -Dcgi=true
+      -Dexmode=true
+      -Dfinger=true
+      -Dgemini=true
+      -Dgnutls=false
+      -Dgopher=true
+      -Dhtml-highlight=true
+      -Dnls=false
+      -Dnntp=true
+      -Dopenssl=true
+      -Dperl=false
+      -Dspidermonkey=false
+      -Dtre=true
+      -Dtrue-color=true
+      -Dx=false
+      -Dxterm=false
+    ]
+    system "meson", "setup", "build", *args, *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   test do
@@ -69,7 +66,6 @@ class Felinks < Formula
       <title>Hello World!</title>
       Abracadabra
     EOS
-    assert_match "Abracadabra",
-      shell_output("#{bin}/elinks -dump test.html").chomp
+    assert_match "Abracadabra", shell_output("#{bin}/elinks -dump test.html").chomp
   end
 end
