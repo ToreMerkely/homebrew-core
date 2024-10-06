@@ -4,6 +4,7 @@ class Pypy310 < Formula
   url "https://downloads.python.org/pypy/pypy3.10-v7.3.17-src.tar.bz2"
   sha256 "6ad74bc578e9c6d3a8a1c51503313058e3c58c35df86f7485453c4be6ab24bf7"
   license "MIT"
+  revision 1
   head "https://github.com/pypy/pypy.git", branch: "main"
 
   livecheck do
@@ -27,7 +28,7 @@ class Pypy310 < Formula
   depends_on "gdbm"
   depends_on "openssl@3"
   depends_on "sqlite"
-  depends_on "tcl-tk"
+  depends_on "tcl-tk@8"
   depends_on "xz"
 
   uses_from_macos "bzip2"
@@ -67,7 +68,7 @@ class Pypy310 < Formula
   def install
     # The `tcl-tk` library paths are hardcoded and need to be modified for non-/usr/local prefix
     inreplace "lib_pypy/_tkinter/tklib_build.py" do |s|
-      s.gsub! "/usr/local/opt/tcl-tk/", Formula["tcl-tk"].opt_prefix/""
+      s.gsub! "/usr/local/opt/tcl-tk/", Formula["tcl-tk@8"].opt_prefix/""
       # We moved `tcl-tk` headers to `include/tcl-tk`.
       # TODO: upstream this.
       s.gsub! "/include'", "/include/tcl-tk'"
