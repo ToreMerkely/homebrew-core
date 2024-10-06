@@ -4,7 +4,7 @@ class Urweb < Formula
   url "https://github.com/urweb/urweb/releases/download/20200209/urweb-20200209.tar.gz"
   sha256 "ac3010c57f8d90f09f49dfcd6b2dc4d5da1cdbb41cbf12cb386e96e93ae30662"
   license "BSD-3-Clause"
-  revision 9
+  revision 10
 
   bottle do
     sha256 arm64_sequoia:  "f7a2e5822d2049c20f829894b478bf5cb4413beff6c6a212084cf0caf24e2170"
@@ -22,7 +22,7 @@ class Urweb < Formula
   depends_on "libtool" => :build
   depends_on "mlton" => :build
   depends_on "gmp"
-  depends_on "icu4c"
+  depends_on "icu4c@75"
   depends_on "openssl@3"
 
   # Patch to fix build for icu4c 68.2
@@ -38,12 +38,14 @@ class Urweb < Formula
   end
 
   def install
+    icu4c = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
+                .to_formula
     system "./configure", *std_configure_args,
                           "--disable-silent-rules",
                           "--with-openssl=#{Formula["openssl@3"].opt_prefix}",
                           "SITELISP=$prefix/share/emacs/site-lisp/urweb",
-                          "ICU_INCLUDES=-I#{Formula["icu4c"].opt_include}",
-                          "ICU_LIBS=-L#{Formula["icu4c"].opt_lib}"
+                          "ICU_INCLUDES=-I#{icu4c.opt_include}",
+                          "ICU_LIBS=-L#{icu4c.opt_lib}"
     system "make", "install"
   end
 
