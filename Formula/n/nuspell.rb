@@ -4,6 +4,7 @@ class Nuspell < Formula
   url "https://github.com/nuspell/nuspell/archive/refs/tags/v5.1.6.tar.gz"
   sha256 "5d4baa1daf833a18dc06ae0af0571d9574cc849d47daff6b9ce11dac0a5ded6a"
   license "LGPL-3.0-or-later"
+  revision 1
 
   bottle do
     sha256 cellar: :any,                 arm64_sequoia:  "e1ca2715c02f6ac8a3039f4334149b56a7f1f2a69195d4f7ec240a362eff7c0e"
@@ -19,13 +20,10 @@ class Nuspell < Formula
   depends_on "cmake" => :build
   depends_on "pandoc" => :build
   depends_on "pkg-config" => :test
-  depends_on "icu4c"
+  depends_on "icu4c@75"
 
   def install
-    args = %W[
-      -DCMAKE_INSTALL_RPATH=#{rpath}
-    ]
-    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_INSTALL_RPATH=#{rpath}", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
@@ -87,7 +85,8 @@ class Nuspell < Formula
       }
     EOS
 
-    ENV.prepend_path "PKG_CONFIG_PATH", Formula["icu4c"].opt_lib/"pkgconfig"
+    icu4c_dep = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
+    ENV.prepend_path "PKG_CONFIG_PATH", icu4c_dep.to_formula.opt_lib/"pkgconfig"
     pkg_config_flags = shell_output("pkg-config --cflags --libs nuspell").chomp.split
     system ENV.cxx, "-std=c++17", "test.cpp", "-o", "test", *pkg_config_flags
     assert_match "Nuspell library loaded dictionary successfully.", shell_output("./test")
