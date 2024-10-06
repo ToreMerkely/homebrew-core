@@ -5,7 +5,7 @@ class ClickhouseOdbc < Formula
   url "https://github.com/ClickHouse/clickhouse-odbc/archive/refs/tags/v1.2.1.20220905.tar.gz"
   sha256 "ca8666cbc7af9e5d4670cd05c9515152c34543e4f45e2bc8fa94bee90d724f1b"
   license "Apache-2.0"
-  revision 4
+  revision 5
   head "https://github.com/ClickHouse/clickhouse-odbc.git", branch: "master"
 
   livecheck do
@@ -28,7 +28,7 @@ class ClickhouseOdbc < Formula
   depends_on "cmake" => :build
   depends_on "folly" => :build
   depends_on "pkg-config" => :build
-  depends_on "icu4c"
+  depends_on "icu4c@75"
   depends_on "openssl@3"
   depends_on "poco"
 
@@ -49,10 +49,11 @@ class ClickhouseOdbc < Formula
     # Remove bundled libraries
     %w[folly googletest nanodbc poco ssl].each { |l| rm_r(buildpath/"contrib"/l) }
 
+    icu4c_dep = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
     args = %W[
       -DCH_ODBC_PREFER_BUNDLED_THIRD_PARTIES=OFF
       -DCH_ODBC_THIRD_PARTY_LINK_STATIC=OFF
-      -DICU_ROOT=#{Formula["icu4c"].opt_prefix}
+      -DICU_ROOT=#{icu4c_dep.to_formula.opt_prefix}
       -DOPENSSL_ROOT_DIR=#{Formula["openssl@3"].opt_prefix}
     ]
     args += if OS.mac?
