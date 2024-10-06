@@ -4,6 +4,7 @@ class Libical < Formula
   url "https://github.com/libical/libical/releases/download/v3.0.18/libical-3.0.18.tar.gz"
   sha256 "72b7dc1a5937533aee5a2baefc990983b66b141dd80d43b51f80aced4aae219c"
   license any_of: ["LGPL-2.1-or-later", "MPL-2.0"]
+  revision 1
 
   bottle do
     sha256 cellar: :any,                 arm64_sequoia:  "eb7bf8fbf5d9553bd0f92cb9d08e85a44ce7cfbac8ffac743c68a5b219042c9d"
@@ -19,7 +20,7 @@ class Libical < Formula
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
   depends_on "glib"
-  depends_on "icu4c"
+  depends_on "icu4c@75"
 
   uses_from_macos "libxml2"
 
