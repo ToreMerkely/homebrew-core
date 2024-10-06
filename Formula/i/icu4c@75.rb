@@ -6,6 +6,9 @@ class Icu4cAT75 < Formula
   sha256 "cb968df3e4d2e87e8b11c49a5d01c787bd13b9545280fc6642f826527618caef"
   license "ICU"
 
+  # We allow the livecheck to detect new `icu4c` major versions in order to
+  # automate version bumps. To make sure PRs are created correctly, we output
+  # an error during installation to notify when a new formula is needed.
   livecheck do
     url :stable
     regex(/^release[._-]v?(\d+(?:[.-]\d+)+)$/i)
@@ -14,11 +17,11 @@ class Icu4cAT75 < Formula
     end
   end
 
-  # TODO: Switch keg_only reason after renaming `icu4c` formula to `icu4c@74` and updating alias to `icu4c@75`
-  # keg_only :provided_by_macos, "macOS provides libicucore.dylib (but nothing else)"
-  keg_only :versioned_formula
+  keg_only :shadowed_by_macos, "macOS provides libicucore.dylib (but nothing else)"
 
   def install
+    odie "Major version bumps need a new formula!" if version.major.to_s != name[/@(\d+)$/, 1]
+
     args = %w[
       --disable-samples
       --disable-tests
