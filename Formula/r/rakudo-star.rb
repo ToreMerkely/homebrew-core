@@ -4,6 +4,7 @@ class RakudoStar < Formula
   url "https://github.com/rakudo/star/releases/download/2024.09/rakudo-star-2024.09.tar.gz"
   sha256 "5b320e963aae8c0345b3ecb9a3d7baaf377729d256548cdafb246076ce65555b"
   license "Artistic-2.0"
+  revision 1
 
   bottle do
     sha256 arm64_sequoia: "8d4d27d6c4e1da20405a88d74c302bbda28ea700d5996c33061c4841ec5a1336"
@@ -16,7 +17,7 @@ class RakudoStar < Formula
 
   depends_on "bash" => :build
   depends_on "gmp"
-  depends_on "icu4c"
+  depends_on "icu4c@75"
   depends_on "openssl@3"
   depends_on "pcre"
   depends_on "readline"
