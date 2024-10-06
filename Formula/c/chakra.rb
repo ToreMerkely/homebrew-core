@@ -2,7 +2,7 @@ class Chakra < Formula
   desc "Core part of the JavaScript engine that powers Microsoft Edge"
   homepage "https://github.com/chakra-core/ChakraCore"
   license "MIT"
-  revision 7
+  revision 8
   head "https://github.com/chakra-core/ChakraCore.git", branch: "master"
 
   stable do
@@ -44,7 +44,7 @@ class Chakra < Formula
   end
 
   depends_on "cmake" => :build
-  depends_on "icu4c"
+  depends_on "icu4c@75"
 
   uses_from_macos "llvm" => :build
   uses_from_macos "python" => :build
@@ -57,8 +57,9 @@ class Chakra < Formula
     # Use ld_classic to work around 'ld: Assertion failed: (0 && "lto symbol should not be in layout")'
     ENV.append "LDFLAGS", "-Wl,-ld_classic" if DevelopmentTools.clang_build_version >= 1500
 
+    icu4c_dep = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
     args = %W[
-      --custom-icu=#{Formula["icu4c"].opt_include}
+      --custom-icu=#{icu4c_dep.to_formula.opt_include}
       --jobs=#{ENV.make_jobs}
       -y
     ]
